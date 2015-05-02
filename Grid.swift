@@ -18,6 +18,11 @@ class Grid {
     // Grid size
     let cellCountX, cellCountY: Int
     
+    // Empty initialiser
+    convenience init() {
+        self.init(cellCountX: 6, cellCountY: 6, objects: [])
+    }
+    
     // Initialize a grid with objects
     init(cellCountX: Int, cellCountY: Int, objects: [Object]) {
         self.cellCountX = cellCountX

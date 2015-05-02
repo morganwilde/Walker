@@ -11,11 +11,13 @@ import SceneKit
 
 let PI = Float(M_PI_2)
 
+<<<<<<< HEAD:GameViewController.swift
 class GameViewController: UIViewController {
+=======
+class ViewController: UIViewController {
+>>>>>>> def8adfeaa158d9ff1bae97961a9dc8c125e1f45:ViewController.swift
     
     @IBOutlet weak var sceneView: SCNView!
-    
-    var grid = Grid()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -148,8 +150,11 @@ class GameViewController: UIViewController {
         cameraNode.position = SCNVector3Make(0, 0, 50)
         cameraNode.camera?.orthographicScale = 100
         cameraNode.camera?.usesOrthographicProjection = true
+<<<<<<< HEAD:GameViewController.swift
         cameraNode.camera?.zFar = 400
         cameraNode.camera?.zNear = -200
+=======
+>>>>>>> def8adfeaa158d9ff1bae97961a9dc8c125e1f45:ViewController.swift
         
         scene.rootNode.addChildNode(cameraNode)
         
@@ -158,5 +163,9 @@ class GameViewController: UIViewController {
         sceneView.allowsCameraControl = true
     }
     
+<<<<<<< HEAD:GameViewController.swift
 }
 
+=======
+}
+>>>>>>> def8adfeaa158d9ff1bae97961a9dc8c125e1f45:ViewController.swift
