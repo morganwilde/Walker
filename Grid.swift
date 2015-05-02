@@ -12,7 +12,7 @@ import SceneKit
 class Grid {
     
     // 2D array of cells
-    var cells: [[Cell]] = [[]]
+    var cells: [[Cell]] = []
     // Object array
     var objects: [Object] = []
     // Grid size
@@ -25,18 +25,13 @@ class Grid {
         self.objects = objects
 
         // Add cells
-        for x in 0...cellCountX {
+        for x in 0..<cellCountX {
             var cellRow: [Cell] = []
-            for y in 0...cellCountY {
-//                println("x: \(x) y: \(y)")
+            for y in 0..<cellCountY {
                 cellRow.append(Cell(x: x, y: y))
             }
-            println("this row has \(cellRow.count)")
             cells.append(cellRow)
-            println(cells.count)
         }
-//        println(cells.count)
-        println(cells[0].count)
     }
     
     // Initialize a grid without any objects

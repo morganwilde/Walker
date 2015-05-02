@@ -27,7 +27,7 @@
                     <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina55"/>
                     <connections>
-                        <outlet property="sceneView" destination="5na-9H-YY9" id="ha2-t9-dfr"/>
+                        <outlet property="sceneView" destination="5na-9H-YY9" id="QHy-n6-HGx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
