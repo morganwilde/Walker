@@ -227,7 +227,10 @@ class GameViewController: UIViewController {
             length: length * height,
             chamferRadius: 0)
         let obstacleMaterial = SCNMaterial()
-        obstacleMaterial.diffuse.contents = UIImage(named: "obstacle-background")
+        
+        let obstacleImage = UIImage(named: "obstacle-background")
+        
+        obstacleMaterial.diffuse.contents = obstacleImage
         obstacleGeometry.firstMaterial = obstacleMaterial
         
         // Find the center
