@@ -32,7 +32,12 @@ class GridView: SCNNode {
         self.planeHeight = planeHeight
         self.planeCountX = planeCountX
         self.planeCountY = planeCountY
-        self.startingPosition = SCNVector3(x: 0, y: 0, z: 0) //Default
+        
+        let paddingX: Float = Float(planeWidth) * Float(planeCountX)/2
+        let paddingY: Float = Float(planeHeight) * Float(planeCountY)/2
+        println(paddingX)
+        
+        self.startingPosition = SCNVector3(x: -paddingX, y: -paddingY, z: -23) //Default
         
         var cellPosition = startingPosition
         
@@ -41,8 +46,8 @@ class GridView: SCNNode {
             var cellsX: [CellView] = []
             for (var j=0; j<planeCountY; j++){
                 
-                cellPosition.x = Float(CGFloat(i) * planeWidth)
-                cellPosition.z = Float(CGFloat(j) * planeHeight)
+                cellPosition.x = Float(CGFloat(i) * planeWidth) + startingPosition.x
+                cellPosition.y = Float(CGFloat(j) * planeHeight) + startingPosition.y
                 let cell = CellView(position: cellPosition, width: planeWidth, height: planeHeight, index: Index(x: i, y: j))
                 cellsX.append(cell)
                 

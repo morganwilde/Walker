@@ -9,39 +9,29 @@
 import UIKit
 import SceneKit
 
-class MyViewController: UIViewController {
+class MyViewController: ViewController {
     
-    @IBOutlet weak var sceneView: SCNView!
+    //@IBOutlet weak var sceneView: SCNView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Scene
-        let scene = SCNScene()
+        //let scene = SCNScene()
         //sceneView.backgroundColor = UIColor.lightGrayColor()
         
         // Grid
-        let grid = GridView(planeWidth: 50, planeHeight: 50, planeCountX: 10, planeCountY: 10)
-        scene.rootNode.addChildNode(grid)
+        let grid = GridView(planeWidth: 10, planeHeight: 10, planeCountX: 20, planeCountY: 6)
+        let rotationX = SCNMatrix4MakeRotation(60*PI/180, 1, 0, 0)
+        let rotationZ = SCNMatrix4MakeRotation(60*PI/180, 0, 0, 1)
+        grid.pivot = SCNMatrix4Mult(rotationX, rotationZ)
+        sceneView.scene!.rootNode.addChildNode(grid)
         
-        // Camera
-        let cameraNode = SCNNode()
-        cameraNode.camera = SCNCamera()
-        
-        //cameraNode.camera?.orthographicScale = 200
-        cameraNode.position = SCNVector3Make(100, 200, 1000)
-        //cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.zFar = 2000
-        
-        scene.rootNode.addChildNode(cameraNode)
-        
-        var x = SCNMatrix4MakeRotation(60*(Float(M_2_PI))/180, 1, 0, 0)
-        var z = SCNMatrix4MakeRotation(60*(Float(M_2_PI))/180, 0, 0, 1)
-        grid.pivot = SCNMatrix4Mult(x, z)
+       // sceneView.scene!.rootNode.addChildNode(cameraNode)
         
         // Create scene
-        sceneView.scene = scene
-        sceneView.allowsCameraControl = true
+        //sceneView.scene = scene
+        //sceneView.allowsCameraControl = true
         
     }
     
