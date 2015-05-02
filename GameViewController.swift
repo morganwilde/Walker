@@ -136,6 +136,26 @@ class GameViewController: UIViewController {
 //        
 //        scene.rootNode.addChildNode(gridNode)
         
+        let ambientLightNode = SCNNode()
+        ambientLightNode.light = SCNLight()
+        ambientLightNode.light!.type = SCNLightTypeAmbient
+        ambientLightNode.light!.color = UIColor(white: 0.5, alpha: 1.0)
+        scene.rootNode.addChildNode(ambientLightNode)
+        
+        let shadowLightNode = SCNNode()
+        
+        shadowLightNode.light = SCNLight()
+        shadowLightNode.light!.type = SCNLightTypeSpot
+        shadowLightNode.light!.castsShadow = true
+        shadowLightNode.light!.shadowColor = UIColor(white: 0, alpha: 1.0)
+        shadowLightNode.light!.spotInnerAngle = 20
+        shadowLightNode.light!.spotOuterAngle = 30
+        
+        shadowLightNode.position = SCNVector3Make(0, 40, 40)
+        shadowLightNode.rotation = SCNVector4Make(1, 0, 0, CFloat(-M_PI_4))
+        
+        scene.rootNode.addChildNode(shadowLightNode)
+        
         // Camera
         let cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
@@ -148,7 +168,7 @@ class GameViewController: UIViewController {
         scene.rootNode.addChildNode(cameraNode)
         
         sceneView.scene = scene
-        sceneView.autoenablesDefaultLighting = true
+//        sceneView.autoenablesDefaultLighting = true
         sceneView.allowsCameraControl = true
     }
     
