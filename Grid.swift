@@ -10,56 +10,50 @@ import Foundation
 import SceneKit
 
 class Grid {
+
+    struct Const {
+        static let X_COUNT = 6
+        static let Y_COUNT = 6
+    }
     
     // 2D array of cells
-    var cells: [[Cell]] = []
+    var cells: [Cell] = []
     // Object array
-    var objects: [Object] = []
+    var obstacles: [Obstacle] = []
     // Grid size
     let cellCountX, cellCountY: Int
     
     // Empty initialiser
     convenience init() {
-        self.init(cellCountX: 6, cellCountY: 6, objects: [])
-    }
-    
-    // Initialize a grid with objects
-    init(cellCountX: Int, cellCountY: Int, objects: [Object]) {
-        self.cellCountX = cellCountX
-        self.cellCountY = cellCountY
-        self.objects = objects
-
-        // Add cells
-        for x in 0..<cellCountX {
-            var cellRow: [Cell] = []
-            for y in 0..<cellCountY {
-                cellRow.append(Cell(x: x, y: y))
-            }
-            cells.append(cellRow)
-        }
+        self.init(cellCountX: Const.X_COUNT, cellCountY: Const.Y_COUNT, obstacles: [])
     }
     
     // Initialize a grid without any objects
     convenience init(cellCountX: Int, cellCountY: Int) {
-        self.init(cellCountX: cellCountX, cellCountY: cellCountY, objects: [])
+        self.init(cellCountX: cellCountX, cellCountY: cellCountY, obstacles: [])
+    }
+    
+    // Initialize a grid with objects
+    init(cellCountX: Int, cellCountY: Int, obstacles: [Obstacle]) {
+        self.cellCountX = cellCountX
+        self.cellCountY = cellCountY
+        self.obstacles = obstacles
+        
+        // Add children
+        for x in 0..<cellCountX {
+            for y in 0..<cellCountY {
+                cells.append(Cell(x: x, y: y))
+            }
+        }
     }
     
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func getCellCount() -> Int {
-        var count = 0
-        for cell in cells {
-            count += cell.count
-        }
-        
-        return count
-    }
-    
     // Returns false if cell doesn't exist or object isn't found on that cell, otherwise true
     func isCellOccupied(#x: Int, y: Int) -> Bool {
-        if (getObjectOnCell(x: x, y: y) == nil) {
+        if (getObstacleOnCell(x: x, y: y) == nil) {
             return false
         } else {
             return true
@@ -68,17 +62,15 @@ class Grid {
     
     // Return the object that's on the given cell position
     // Returns nil if the cell is not occupied or just doesn't exist
-    func getObjectOnCell(#x: Int, y: Int) -> Object? {
-        if (cells.count < x || cells[x].count < y) {
+    func getObstacleOnCell(#x: Int, y: Int) -> Obstacle? {
+        if (cells.count < x * y) {
             return nil
         }
         
-        for cellRow in cells {
-            for cell in cellRow {
-                for object in objects {
-                    if object.occupies(cell) {
-                        return object
-                    }
+        for cell in cells {
+            for obstacle in obstacles {
+                if obstacle.occupies(cell) {
+                    return obstacle
                 }
             }
         }
