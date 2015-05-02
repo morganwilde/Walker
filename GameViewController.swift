@@ -189,8 +189,8 @@ class GameViewController: UIViewController {
     
     func createGridViews() {
         // Find the center
-        let horizontalMiddle = grid.cellCountX / 2
-        let verticalMiddle = grid.cellCountY / 2
+        let horizontalMiddle = grid.width / 2
+        let verticalMiddle = grid.height / 2
         
         gridNode.pivot = SCNMatrix4Mult(perspectiveRotation, SCNMatrix4MakeTranslation(0, 0, 15+15/2))
         
@@ -234,8 +234,8 @@ class GameViewController: UIViewController {
         obstacleGeometry.firstMaterial = obstacleMaterial
         
         // Find the center
-        let horizontalMiddle = Float(grid.cellCountX) / 2
-        let verticalMiddle = Float(grid.cellCountY) / 2
+        let horizontalMiddle = Float(grid.width) / 2
+        let verticalMiddle = Float(grid.height) / 2
         
         // Find the appropriate position
         let obstaceNode = SCNNode(geometry: obstacleGeometry)

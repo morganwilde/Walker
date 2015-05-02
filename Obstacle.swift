@@ -18,13 +18,7 @@ class Obstacle {
     }
     
     func occupies(cell: Cell) -> Bool {
-        for occupiedCell in occupiedCells {
-            if (occupiedCell == cell) {
-                return true
-            }
-        }
-        
-        return false
+        return contains(occupiedCells, cell)
     }
     
 }
