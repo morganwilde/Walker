@@ -27,6 +27,17 @@ class MyViewController: ViewController {
         grid.pivot = SCNMatrix4Mult(rotationX, rotationZ)
         sceneView.scene!.rootNode.addChildNode(grid)
         
+        //Walls
+        for cellArray in grid.cells {
+            for cell in cellArray{
+                let i = arc4random_uniform(3)
+                if(i > 1){
+                    let wall = WallObstacle(cell: cell)
+                    wall.pivot = grid.pivot
+                    sceneView.scene!.rootNode.addChildNode(wall)
+                }
+            }
+        }
        // sceneView.scene!.rootNode.addChildNode(cameraNode)
         
         // Create scene

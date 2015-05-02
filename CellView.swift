@@ -20,14 +20,17 @@ class CellView: SCNNode {
         
         self.index = index
         box = SCNBox(width: width, height: height, length: 1, chamferRadius: 0)
+        
         let material = SCNMaterial()
         material.diffuse.contents = UIColor(red: 0, green: 0, blue: 255, alpha: 0.5)
         material.diffuse.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.9)
+        
         box.firstMaterial = material
         
         super.init()
         geometry = box
         self.position = position
+        println(position.x, position.y, position.z)
         
     }
 
