@@ -9,49 +9,57 @@
 import UIKit
 import SceneKit
 
+// Constants - numeric
 let PI = Float(M_PI_2)
+
+// Constants - materials
+struct Constants {
+    static let redColorMaterial = ColorMaterial(UIColor.redColor())
+    static let blueColorMaterial = ColorMaterial(UIColor.blueColor())
+    static let grayColorMaterial = ColorMaterial(UIColor.grayColor())
+    static let lightGrayColorMaterial = ColorMaterial(UIColor.lightGrayColor())
+}
 
 class GameViewController: UIViewController {
     
+    // Outlets
     @IBOutlet weak var sceneView: SCNView!
     
+    // Views
+    var scene = SCNScene()
+    
+    // Models
     var grid = Grid()
+    
+    // Properties
+    var perspectiveRotationX = SCNMatrix4MakeRotation(120*PI/180, 1, 0, 0)
+    var perspectiveRotationZ = SCNMatrix4MakeRotation(60*PI/180, 0, 0, 1)
+    var perspectiveRotation: SCNMatrix4 {
+        return SCNMatrix4Mult(perspectiveRotationX, perspectiveRotationZ)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let scene = SCNScene()
-        
-        // Materials
-        let redColorMaterial = SCNMaterial()
-        redColorMaterial.diffuse.contents = UIColor.redColor()
-        let blueColorMaterial = SCNMaterial()
-        blueColorMaterial.diffuse.contents = UIColor.blueColor()
-        let grayColorMaterial = SCNMaterial()
-        grayColorMaterial.diffuse.contents = UIColor.grayColor()
-        let lightGrayColorMaterial = SCNMaterial()
-        lightGrayColorMaterial.diffuse.contents = UIColor.lightGrayColor()
         
         let characterNode = SCNNode()
-        let rotationX = SCNMatrix4MakeRotation(120*PI/180, 1, 0, 0)
-        let rotationZ = SCNMatrix4MakeRotation(60*PI/180, 0, 0, 1)
-        characterNode.pivot = SCNMatrix4Mult(rotationX, rotationZ)
+        characterNode.pivot = perspectiveRotation
         
         // Torso
         let torsoGeometry = SCNBox(width: 6, height: 10, length: 15, chamferRadius: 0)
-        torsoGeometry.firstMaterial = redColorMaterial
+        torsoGeometry.firstMaterial = Constants.redColorMaterial
         let torsoNode = SCNNode(geometry: torsoGeometry)
         characterNode.addChildNode(torsoNode)
         
         // Head
         let headGeometry = SCNBox(width: 6, height: 6, length: 6, chamferRadius: 0)
-        headGeometry.firstMaterial = blueColorMaterial
+        headGeometry.firstMaterial = Constants.blueColorMaterial
         let headNode = SCNNode(geometry: headGeometry)
         headNode.position = SCNVector3(x: 0, y: 0, z: Float(torsoGeometry.length)/2 + Float(headGeometry.length)/2)
         characterNode.addChildNode(headNode)
         
         // Arm right
         let armGeometry = SCNBox(width: 3, height: 3, length: 12, chamferRadius: 0)
-        armGeometry.firstMaterial = grayColorMaterial
+        armGeometry.firstMaterial = Constants.grayColorMaterial
         let armRightNode = SCNNode(geometry: armGeometry)
         armRightNode.position = SCNVector3(x: 0, y: 0, z: Float(torsoGeometry.length)/2)
         armRightNode.pivot = SCNMatrix4MakeTranslation(0, -Float(torsoGeometry.height)/2 - Float(armGeometry.height)/2, Float(armGeometry.length)/2)
@@ -67,7 +75,7 @@ class GameViewController: UIViewController {
         
         // Leg right
         let legGeometry = SCNBox(width: 4, height: 4, length: 15, chamferRadius: 0)
-        legGeometry.firstMaterial = blueColorMaterial
+        legGeometry.firstMaterial = Constants.blueColorMaterial
         let legRightNode = SCNNode(geometry: legGeometry)
         legRightNode.position = SCNVector3(x: 0, y: Float(torsoGeometry.height)/2 - Float(legGeometry.height)/2, z: 0)
         legRightNode.pivot = SCNMatrix4MakeTranslation(0, 0, Float(legGeometry.length))
@@ -108,39 +116,25 @@ class GameViewController: UIViewController {
         armLeftNode.runAction(SCNAction.repeatActionForever(armLeftAnimation))
         
         // Grid
-        let gridNode = SCNNode()
-        let rotation = SCNMatrix4Mult(rotationX, rotationZ)
-        gridNode.pivot = SCNMatrix4Mult(rotation, SCNMatrix4MakeTranslation(0, 0, 15+15/2))
+        generateGridViews()
         
-        let cellGeometry = SCNBox(width: 16, height: 16, length: 3, chamferRadius: 0.5)
-        cellGeometry.firstMaterial = lightGrayColorMaterial
-        for var vertical: Float = -10; vertical <= 10; vertical++ {
-            for var horizontal: Float = -10; horizontal <= 10; horizontal++ {
-                let cellNode = SCNNode(geometry: cellGeometry)
-                cellNode.position = SCNVector3(
-                    x: vertical * (Float(cellGeometry.width) + 0.5),
-                    y: horizontal * (Float(cellGeometry.height) + 0.5), z: 0)
-                gridNode.addChildNode(cellNode)
-            }
-        }
-        
-        // Obstacles
-        let obstacleGeometry = SCNBox(
-            width: 1 * (cellGeometry.width + 0.5),
-            height: 6 * (cellGeometry.height + 0.5),
-            length: 2 * cellGeometry.height,
-            chamferRadius: 0.5)
-        let obstacleMaterial = SCNMaterial()
-        obstacleMaterial.diffuse.contents = UIColor.orangeColor()
-        obstacleGeometry.firstMaterial = obstacleMaterial
-        let obstacleNode = SCNNode(geometry: obstacleGeometry)
-        obstacleNode.pivot = SCNMatrix4MakeTranslation(
-            -Float(obstacleGeometry.width),
-            -Float(obstacleGeometry.height) - Float(obstacleGeometry.width)/2,
-            -Float(obstacleGeometry.length/2) - Float(cellGeometry.length)/2)
-        gridNode.addChildNode(obstacleNode)
-        
-        scene.rootNode.addChildNode(gridNode)
+//        // Obstacles
+//        let obstacleGeometry = SCNBox(
+//            width: 1 * (cellGeometry.width + 0.5),
+//            height: 6 * (cellGeometry.height + 0.5),
+//            length: 2 * cellGeometry.height,
+//            chamferRadius: 0.5)
+//        let obstacleMaterial = SCNMaterial()
+//        obstacleMaterial.diffuse.contents = UIColor.orangeColor()
+//        obstacleGeometry.firstMaterial = obstacleMaterial
+//        let obstacleNode = SCNNode(geometry: obstacleGeometry)
+//        obstacleNode.pivot = SCNMatrix4MakeTranslation(
+//            -Float(obstacleGeometry.width),
+//            -Float(obstacleGeometry.height) - Float(obstacleGeometry.width)/2,
+//            -Float(obstacleGeometry.length/2) - Float(cellGeometry.length)/2)
+//        gridNode.addChildNode(obstacleNode)
+//        
+//        scene.rootNode.addChildNode(gridNode)
         
         // Camera
         let cameraNode = SCNNode()
@@ -156,6 +150,39 @@ class GameViewController: UIViewController {
         sceneView.scene = scene
         sceneView.autoenablesDefaultLighting = true
         sceneView.allowsCameraControl = true
+    }
+    
+    func generateGridViews() {
+        // Find the center
+        let verticalMiddle = grid.cellCountX / 2
+        let horizontalMiddle = grid.cellCountY / 2
+        
+        
+        let gridNode = SCNNode()
+        gridNode.pivot = SCNMatrix4Mult(perspectiveRotation, SCNMatrix4MakeTranslation(0, 0, 15+15/2))
+        
+        let cellGeometry = SCNBox(width: 16, height: 16, length: 3, chamferRadius: 0)
+        let cellMaterial = SCNMaterial()
+        cellMaterial.diffuse.contents = UIImage(named: "cell-background")
+        cellGeometry.firstMaterial = cellMaterial
+        
+        for var vertical = -verticalMiddle; vertical <= verticalMiddle; vertical++ {
+            for var horizontal = -horizontalMiddle; horizontal <= horizontalMiddle; horizontal++ {
+                
+                let x = Float(horizontal)
+                let y = Float(vertical)
+                
+                let cellNode = SCNNode(geometry: cellGeometry)
+                cellNode.position = SCNVector3(
+                    x: x * Float(cellGeometry.width),
+                    y: y * Float(cellGeometry.height),
+                    z: 0
+                )
+                gridNode.addChildNode(cellNode)
+            }
+        }
+        
+        scene.rootNode.addChildNode(gridNode)
     }
     
 }
