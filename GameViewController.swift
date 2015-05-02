@@ -27,6 +27,7 @@ class GameViewController: UIViewController {
     
     // Views
     var scene = SCNScene()
+    var gridNode = SCNNode()
     
     // Models
     var grid = Grid()
@@ -116,7 +117,22 @@ class GameViewController: UIViewController {
         armLeftNode.runAction(SCNAction.repeatActionForever(armLeftAnimation))
         
         // Grid
-        generateGridViews()
+        createGridViews()
+        
+        // Obstacles
+        createObstacleAtLocation(6, y: 6, height: 1) // Left wall
+        createObstacleAtLocation(5, y: 6, height: 2)
+        createObstacleAtLocation(4, y: 6, height: 3)
+        createObstacleAtLocation(3, y: 6, height: 1)
+        createObstacleAtLocation(2, y: 6, height: 2)
+        createObstacleAtLocation(1, y: 6, height: 1)
+        createObstacleAtLocation(0, y: 6, height: 1)
+        
+        createObstacleAtLocation(6, y: 5, height: 1) // Front wall
+        createObstacleAtLocation(6, y: 4, height: 1)
+        createObstacleAtLocation(6, y: 2, height: 1)
+        createObstacleAtLocation(6, y: 1, height: 1)
+        createObstacleAtLocation(6, y: 0, height: 1)
         
 //        // Obstacles
 //        let obstacleGeometry = SCNBox(
@@ -168,17 +184,14 @@ class GameViewController: UIViewController {
         scene.rootNode.addChildNode(cameraNode)
         
         sceneView.scene = scene
-//        sceneView.autoenablesDefaultLighting = true
         sceneView.allowsCameraControl = true
     }
     
-    func generateGridViews() {
+    func createGridViews() {
         // Find the center
-        let verticalMiddle = grid.cellCountX / 2
-        let horizontalMiddle = grid.cellCountY / 2
+        let horizontalMiddle = grid.cellCountX / 2
+        let verticalMiddle = grid.cellCountY / 2
         
-        
-        let gridNode = SCNNode()
         gridNode.pivot = SCNMatrix4Mult(perspectiveRotation, SCNMatrix4MakeTranslation(0, 0, 15+15/2))
         
         let cellGeometry = SCNBox(width: 16, height: 16, length: 3, chamferRadius: 0)
@@ -203,6 +216,33 @@ class GameViewController: UIViewController {
         }
         
         scene.rootNode.addChildNode(gridNode)
+    }
+    
+    func createObstacleAtLocation(x: Float, y: Float, height: CGFloat) {
+        // A single cell cube obstacle
+        let length: CGFloat = 16
+        let obstacleGeometry = SCNBox(
+            width: length,
+            height: length,
+            length: length * height,
+            chamferRadius: 0)
+        let obstacleMaterial = SCNMaterial()
+        obstacleMaterial.diffuse.contents = UIImage(named: "obstacle-background")
+        obstacleGeometry.firstMaterial = obstacleMaterial
+        
+        // Find the center
+        let horizontalMiddle = Float(grid.cellCountX) / 2
+        let verticalMiddle = Float(grid.cellCountY) / 2
+        
+        // Find the appropriate position
+        let obstaceNode = SCNNode(geometry: obstacleGeometry)
+        obstaceNode.pivot = SCNMatrix4MakeTranslation(0, 0, -Float(obstacleGeometry.length)/2 - 3/2)
+        obstaceNode.position = SCNVector3(
+            x: (x - horizontalMiddle) * Float(length),
+            y: (y - verticalMiddle) * Float(length),
+            z: 0)
+        
+        gridNode.addChildNode(obstaceNode)
     }
     
 }
