@@ -12,7 +12,7 @@ import SceneKit
 class Grid {
     
     // 2D array of cells
-    var cells: [[Cell]] = []
+    var cells: [Cell] = []
     // Object array
     var objects: [Object] = []
     // Grid size
@@ -23,15 +23,6 @@ class Grid {
         self.cellCountX = cellCountX
         self.cellCountY = cellCountY
         self.objects = objects
-
-        // Add cells
-        for x in 0..<cellCountX {
-            var cellRow: [Cell] = []
-            for y in 0..<cellCountY {
-                cellRow.append(Cell(x: x, y: y))
-            }
-            cells.append(cellRow)
-        }
     }
     
     // Initialize a grid without any objects
@@ -41,15 +32,6 @@ class Grid {
     
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    func getCellCount() -> Int {
-        var count = 0
-        for cell in cells {
-            count += cell.count
-        }
-        
-        return count
     }
     
     // Returns false if cell doesn't exist or object isn't found on that cell, otherwise true
@@ -64,16 +46,14 @@ class Grid {
     // Return the object that's on the given cell position
     // Returns nil if the cell is not occupied or just doesn't exist
     func getObjectOnCell(#x: Int, y: Int) -> Object? {
-        if (cells.count < x || cells[x].count < y) {
+        if (cells.count < x * y) {
             return nil
         }
         
-        for cellRow in cells {
-            for cell in cellRow {
-                for object in objects {
-                    if object.occupies(cell) {
-                        return object
-                    }
+        for cell in cells {
+            for object in objects {
+                if object.occupies(cell) {
+                    return object
                 }
             }
         }

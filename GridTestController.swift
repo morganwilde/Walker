@@ -27,19 +27,16 @@ class GridTestController: UIViewController {
         
         var objects: [Object]?
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "onCellActivated", name: "identifier", object: Cell.self)
-        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "onCellActivated:", name: "identifier", object: nil)
         let grid = Grid(cellCountX: 10, cellCountY: 10)
-        println(grid.cells[0].count)
-        grid.cells[0][0].activated = true
+        grid.cells[5][3].activated = true
         grid.cells[0][0].activated = false
-        
         
 //        scene.rootNode.addChildNode(GridModel(width: 10, height: 10))
     }
     
-    func onCellActivated(activatedCell: Cell) {
-        println("received notification:")
+    @objc func onCellActivated(notification: NSNotification) {
+        println("Received cell: \(notification.object!)")
     }
     
 }

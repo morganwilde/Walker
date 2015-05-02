@@ -19,17 +19,20 @@ func ==(lhs: Cell, rhs: Cell) -> Bool {
     return (lhs.x == rhs.x && lhs.y == rhs.y)
 }
 
-class Cell {
+class Cell : NSObject {
     
     // Cell position within the Grid
     let x, y: Int
     var activated = false {
         didSet {
             if activated != oldValue {
-                println("Activated property changed to \(activated). Notifying.")
-                NSNotificationCenter.defaultCenter().postNotificationName("identifier", object: self)
+                NSNotificationCenter.defaultCenter().postNotification(NSNotification(name: "identifier", object: self))
             }
         }
+    }
+    
+    override var description: String {
+        return "Cell position: (\(x),\(y))"
     }
     
     init(x: Int, y: Int) {
