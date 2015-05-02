@@ -9,10 +9,8 @@
 import Foundation
 import SceneKit
 
-// Objects are static objects on top of a grid
-class Object {
-    
-    // ToDo? Create object from given width
+// Obstacles are static objects on top of a grid
+class Obstacle {
     
     var occupiedCells: [Cell] = []
     init(occupiedCells: [Cell]) {

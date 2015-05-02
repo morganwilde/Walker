@@ -9,27 +9,27 @@
 import Foundation
 import SceneKit
 
-// Convenience function to compare a cell to two integers, i.e. a set of x,y coordinate
-func ==(lhs: Cell, rhs: (Int, Int)) -> Bool {
-    return (lhs.x == rhs.0 && lhs.y == rhs.1)
-}
-
 // Compare CellModel coordinates instead of pointers
 func ==(lhs: Cell, rhs: Cell) -> Bool {
     return (lhs.x == rhs.x && lhs.y == rhs.y)
 }
 
-class Cell {
+let CELL_ACTIVATION_NOTIFIER = "cell_activation_notifier"
+
+class Cell : NSObject {
     
     // Cell position within the Grid
     let x, y: Int
     var activated = false {
         didSet {
             if activated != oldValue {
-                println("Activated property changed to \(activated). Notifying.")
-                NSNotificationCenter.defaultCenter().postNotificationName("identifier", object: self)
+                NSNotificationCenter.defaultCenter().postNotificationName(CELL_ACTIVATION_NOTIFIER, object: self)
             }
         }
+    }
+    
+    override var description: String {
+        return "Cell position: (\(x),\(y))"
     }
     
     init(x: Int, y: Int) {

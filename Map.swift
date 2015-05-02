@@ -14,7 +14,7 @@ class Map {
     // Map knows about the size of the grid and where the obstacles should be located
     // Map initializes the grid and the objects within
     
-    init(gridX: Int, gridY: Int, objects: [Object]?) {
+    init(gridX: Int, gridY: Int, objects: [Obstacle]?) {
         
     }
 
