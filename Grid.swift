@@ -10,16 +10,18 @@ import Foundation
 import SceneKit
 
 class Grid {
-
+    // Grid related constants
     struct Const {
         static let WIDTH = 6
         static let HEIGHT = 6
     }
     
+    // Grid dimensions (cell count)
+    let width: Int
+    let height: Int
+    // Grid containers
     var cells: [Cell] = []
     var obstacles: [Obstacle] = []
-    // Gride dimensions (cell count)
-    let width, height: Int
     
     // Empty initialiser
     convenience init() {
@@ -31,16 +33,16 @@ class Grid {
         self.width = width
         self.height = height
         
-        // Add children
-        for col in 0..<width {
-            for row in 0..<height {
-                cells.append(Cell(index: row * width + col))
+        // Add children in the row first order - (0,0) is the top left coordinate
+        for row in 0..<height {
+            for column in 0..<width {
+                cells.append(Cell(index: row * width + column))
             }
         }
     }
     
-    func getCell(col: Int, row: Int) -> Cell {
-        return cells[row * width + row]
+    func getCell(column: Int, row: Int) -> Cell {
+        return cells[row * width + column]
     }
 
 }
