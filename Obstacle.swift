@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import SceneKit
 
 // Obstacles are static objects on top of a grid
 class Obstacle {

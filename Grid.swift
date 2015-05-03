@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import SceneKit
 
 class Grid {
     // Grid related constants

@@ -7,12 +7,12 @@
 //
 
 import Foundation
-import SceneKit
 
 let CELL_ACTIVATION_NOTIFIER = "cell_activation_notifier"
 
 class Cell : NSObject {
     
+    let index: Int
     var activated = false {
         didSet {
             if activated != oldValue {
@@ -20,7 +20,6 @@ class Cell : NSObject {
             }
         }
     }
-    let index: Int
     
     init(index: Int) {
         self.index = index
