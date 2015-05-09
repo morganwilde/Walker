@@ -29,7 +29,7 @@ func MatrixVectorProduct(matrix: SCNMatrix4, vector: SCNVector4) -> SCNVector4 {
     return SCNVector4(x: x, y: y, z: z, w: w)
 }
 
-class GameViewController: UIViewController {
+class GameViewController: UIViewController, SCNPhysicsContactDelegate {
     
     // Outlets
     @IBOutlet weak var sceneView: SCNView!
@@ -51,68 +51,48 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         // Grid
         createGridViews()
         
         let character = Character()
-        character.position = SCNVector3(x: 20, y: 0, z: 40)
+//        character.position = SCNVector3(x: 20, y: 0, z: 40)
+        character.position = SCNVector3(x: -30, y: -20, z: 40)
         gridNode.addChildNode(character)
     
         
         // Obstacles
-        createObstacleAtLocation(6, y: 6, height: 1) // Left wall
+        // Left wall
+        createObstacleAtLocation(6, y: 6, height: 1)
         createObstacleAtLocation(5, y: 6, height: 2)
         createObstacleAtLocation(4, y: 6, height: 3)
         createObstacleAtLocation(3, y: 6, height: 1)
         createObstacleAtLocation(2, y: 6, height: 2)
         createObstacleAtLocation(1, y: 6, height: 1)
         createObstacleAtLocation(0, y: 6, height: 1)
-        
-        createObstacleAtLocation(6, y: 5, height: 1) // Front wall
+        // Front wall
+        createObstacleAtLocation(6, y: 5, height: 1)
         createObstacleAtLocation(6, y: 4, height: 1)
         createObstacleAtLocation(6, y: 2, height: 1)
         createObstacleAtLocation(6, y: 1, height: 1)
         createObstacleAtLocation(6, y: 0, height: 1)
         
-//        // Obstacles
-//        let obstacleGeometry = SCNBox(
-//            width: 1 * (cellGeometry.width + 0.5),
-//            height: 6 * (cellGeometry.height + 0.5),
-//            length: 2 * cellGeometry.height,
-//            chamferRadius: 0.5)
-//        let obstacleMaterial = SCNMaterial()
-//        obstacleMaterial.diffuse.contents = UIColor.orangeColor()
-//        obstacleGeometry.firstMaterial = obstacleMaterial
-//        let obstacleNode = SCNNode(geometry: obstacleGeometry)
-//        obstacleNode.pivot = SCNMatrix4MakeTranslation(
-//            -Float(obstacleGeometry.width),
-//            -Float(obstacleGeometry.height) - Float(obstacleGeometry.width)/2,
-//            -Float(obstacleGeometry.length/2) - Float(cellGeometry.length)/2)
-//        gridNode.addChildNode(obstacleNode)
-//        
-//        scene.rootNode.addChildNode(gridNode)
-
-        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -1000)
-        
+        // Ambient light
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = SCNLightTypeAmbient
         ambientLightNode.light!.color = UIColor(white: 0.5, alpha: 1.0)
         scene.rootNode.addChildNode(ambientLightNode)
         
+        // Shadow light
         let shadowLightNode = SCNNode()
-        
         shadowLightNode.light = SCNLight()
         shadowLightNode.light!.type = SCNLightTypeSpot
         shadowLightNode.light!.castsShadow = true
         shadowLightNode.light!.shadowColor = UIColor(white: 0, alpha: 1.0)
         shadowLightNode.light!.spotInnerAngle = 20
         shadowLightNode.light!.spotOuterAngle = 30
-        
         shadowLightNode.position = SCNVector3Make(0, 40, 40)
         shadowLightNode.rotation = SCNVector4Make(1, 0, 0, CFloat(-M_PI_4))
-        
         scene.rootNode.addChildNode(shadowLightNode)
         
         // Camera
@@ -123,17 +103,19 @@ class GameViewController: UIViewController {
         cameraNode.camera?.usesOrthographicProjection = true
         cameraNode.camera?.zFar = 400
         cameraNode.camera?.zNear = -200
-        
         let perspectiveRotationX = SCNMatrix4MakeRotation(135*PI/180, 1, 0, 0)
         let perspectiveRotationY = SCNMatrix4MakeRotation(0*PI/180, 0, 1, 0)
         let perspectiveRotationZ = SCNMatrix4MakeRotation(60*PI/180, 0, 0, 1)
         let perspectiveRotation = SCNMatrix4Mult(SCNMatrix4Mult(perspectiveRotationX, perspectiveRotationY) , perspectiveRotationZ)
         cameraNode.transform = perspectiveRotation
-        
         scene.rootNode.addChildNode(cameraNode)
         
+        // Scene preferences
+        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -1000)
+        scene.physicsWorld.contactDelegate = self
+        
+        // SceneView preferences
         sceneView.scene = scene
-        sceneView.backgroundColor = UIColor.blackColor()
         sceneView.showsStatistics = true
         sceneView.allowsCameraControl = true
     }
@@ -142,9 +124,7 @@ class GameViewController: UIViewController {
         // Find the center
         let horizontalMiddle = grid.width / 2
         let verticalMiddle = grid.height / 2
-        
-//        gridNode.pivot = SCNMatrix4Mult(perspectiveRotation, SCNMatrix4MakeTranslation(0, 0, 15+15/2))
-        
+
         let cellGeometry = SCNBox(width: 16, height: 16, length: 3, chamferRadius: 0)
         let cellMaterial = SCNMaterial()
         cellMaterial.diffuse.contents = UIImage(named: "cell-background")
@@ -193,14 +173,36 @@ class GameViewController: UIViewController {
         let verticalMiddle = Float(grid.height) / 2
         
         // Find the appropriate position
-        let obstaceNode = SCNNode(geometry: obstacleGeometry)
-//        obstaceNode.pivot = SCNMatrix4MakeTranslation(0, 0, -Float(obstacleGeometry.length)/2 - 3/2)
-        obstaceNode.position = SCNVector3(
+        let obstacleNode = SCNNode(geometry: obstacleGeometry)
+        obstacleNode.position = SCNVector3(
             x: (x - horizontalMiddle) * Float(length),
             y: (y - verticalMiddle) * Float(length),
-            z: Float(grid.height) + Float(height))
+            z: Float(grid.height) + Float(height) * 2)
         
-        gridNode.addChildNode(obstaceNode)
+        // Static physics body
+        obstacleNode.physicsBody = .staticBody()
+        obstacleNode.physicsBody?.categoryBitMask = Mask.OBSTACLE
+        obstacleNode.physicsBody?.collisionBitMask = Mask.CHARACTER
+        
+        gridNode.addChildNode(obstacleNode)
+    }
+    
+    func physicsWorld(world: SCNPhysicsWorld, didBeginContact contact: SCNPhysicsContact) {
+        switch (contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask) {
+        case (Mask.CHARACTER | Mask.OBSTACLE):
+            // Stop character
+            if let char = contact.nodeA as? Character {
+                char.stop()
+            } else if let char = contact.nodeB as? Character {
+                char.stop()
+            }
+        case (Mask.CHARACTER | Mask.FLOOR):
+            // Prevent spam on default case
+            break
+        default:
+            println("Collision between: \(contact.nodeA.physicsBody!.categoryBitMask) and \(contact.nodeB.physicsBody!.categoryBitMask)")
+            break
+        }
     }
     
 }

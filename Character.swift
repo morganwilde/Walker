@@ -9,10 +9,10 @@
 import SceneKit
 
 struct Mask {
-    static let SCENE        = 0x1 << 1
-    static let FLOOR        = 0x1 << 2
-    static let CHARACTER    = 0x1 << 3
-    static let OBSTACLE     = 0x1 << 4
+    static let SCENE        = 1
+    static let FLOOR        = 2
+    static let CHARACTER    = 3
+    static let OBSTACLE     = 4
 }
 
 class Character: SCNNode  {
@@ -20,7 +20,7 @@ class Character: SCNNode  {
     let LIMB_ROTATE_DURATION = 0.5 as NSTimeInterval
     let LEG_ROTATION = PI/12
     let ARM_ROTATION = PI/6
-    let SPEED = 145 / 10 // points / second
+    let SPEED = 14.5 // points / second
     let headDimensions = Dimensions(width: 6, height: 6, length: 6)
     let torsoDimensions = Dimensions(width: 10, height: 15, length: 6)
     let armDimensions = Dimensions(width: 3, height: 12, length: 3)
@@ -79,61 +79,35 @@ class Character: SCNNode  {
         addChildNode(legLeft)
         addChildNode(legRight)
         
-        // Physics body // ToDo iskaiciuot isskleistu ranku ilgi
-        geometry = SCNBox(width: headDimensions.length + torsoDimensions.length + legDimensions.length,
-            height: headDimensions.width + torsoDimensions.width + legDimensions.width,
+        // Physics body // ToDo iskaiciuot isskleistu ranku ilgi // ToDo -5 = because too fat to fit between obstacles
+        geometry = SCNBox(width: headDimensions.length + torsoDimensions.length + legDimensions.length - 5,
+            height: headDimensions.width + torsoDimensions.width + legDimensions.width - 5,
             length: headDimensions.height + torsoDimensions.height + legDimensions.height + 8,
             chamferRadius: 0)
         geometry!.firstMaterial!.diffuse.contents = UIColor.clearColor()
         physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(geometry: geometry!, options: nil))
+        physicsBody?.categoryBitMask = Mask.CHARACTER
+        physicsBody?.collisionBitMask = Mask.FLOOR | Mask.OBSTACLE
+        
+        // Weird physicsBody params (might need to prevent the friction)
         physicsBody?.restitution = 0
         physicsBody?.angularDamping = 100000
         physicsBody?.angularVelocity = SCNVector4Make(0, 0, 0, 0)
-        physicsBody?.friction = 50
-        physicsBody?.categoryBitMask = Mask.CHARACTER
-        physicsBody?.collisionBitMask = Mask.FLOOR
+        physicsBody?.friction = 0
         
-//        // Leg animations
-//        var rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
-//        var rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
-//        let legLeftAnimation = SCNAction.sequence([rotateNeg, rotatePos])
-//        let legRightAnimation = SCNAction.sequence([rotatePos, rotateNeg])
-//        
-//        legLeft.runAction(SCNAction.repeatActionForever(legLeftAnimation))
-//        legRight.runAction(SCNAction.repeatActionForever(legRightAnimation))
-//        
-//        // Arm animations
-//        rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
-//        rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
-//        let armLeftAnimation = SCNAction.sequence([rotatePos, rotateNeg])
-//        let armRightAnimation = SCNAction.sequence([rotateNeg, rotatePos])
-//        
-//        armLeft.runAction(SCNAction.repeatActionForever(armLeftAnimation))
-//        armRight.runAction(SCNAction.repeatActionForever(armRightAnimation))
-//        
-//        let myself = self
-//        runAction(SCNAction.sequence([
-//            SCNAction.waitForDuration(3.123),
-//            SCNAction.runBlock({ (myself) -> Void in
-//                self.stop()
-//            }, queue: dispatch_get_main_queue())
-//        ]))
+        
         let myself = self
-        runAction(SCNAction.runBlock({ (myself) -> Void in
-            self.moveTo(100, y: 0, z: 0)
-        }))
-        
-//        runAction(SCNAction.sequence([
-//            SCNAction.waitForDuration(2.345),
-//            SCNAction.runBlock({ (myself) -> Void in
-//                self.stop()
-//            })
-//        ]))
+        runAction(SCNAction.sequence([
+            SCNAction.runBlock({ (myself) -> Void in
+                self.moveBy(69, y: 0, z: 0)
+            })
+        ]))
     }
 
+    // ToDo pre-create and re-use all the actions
     // ToDo if stop() action is in progress, remove and continue the movement ---- re-use rotateTo
-    // ToDo Make sure to call stop after movement is done
-    func moveTo(x: Float, y: Float, z: Float) {
+    // Stop is called automatically when the movement is finished or the action is cancelled
+    func moveBy(x: Float, y: Float, z: Float) {
         // Rotation actions
         let rotateArmNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
         let rotateArmPos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
@@ -146,14 +120,14 @@ class Character: SCNNode  {
         let legLeftRotation = SCNAction.repeatActionForever(SCNAction.sequence([rotateLegNeg, rotateLegPos]))
         let legRightRotation = SCNAction.repeatActionForever(SCNAction.sequence([rotateLegPos, rotateLegNeg]))
         
-        // Distance from current position to target
+        // Distance and duration
         let target = SCNVector3Make(position.x + x, position.y + y, position.z + z)
         let distance = sqrt(pow(target.x - position.x, 2) + pow(target.y - position.y, 2) + pow(target.z - position.z, 2))
-        println("distance: \(distance)")
         let duration = NSTimeInterval(distance / Float(SPEED))
-        println("duration: \(duration)")
+        println("Move distance: \(distance) in duration: \(duration)")
+        
         // Character movement action
-        let charMovement = SCNAction.repeatActionForever(SCNAction.moveByX(CGFloat(x), y: CGFloat(y), z: CGFloat(z), duration: duration))
+        let charMovement = SCNAction.moveByX(CGFloat(x), y: CGFloat(y), z: CGFloat(z), duration: duration)
         
         let myself = self as Character
         // Limb movement action
@@ -166,7 +140,7 @@ class Character: SCNNode  {
         
         // Char movement action
         let groupAction = SCNAction.runBlock({ (myself) -> Void in
-            // Following is a repeating action
+            // Following is a group of actions repeating action
             self.runAction(SCNAction.group([
                 limbMovement,
                 charMovement
@@ -182,12 +156,15 @@ class Character: SCNNode  {
     // Always runs on the UI thread
     func stop() {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            println("Character.stop() invoked")
+            // Remove all actions (movements/rotations)
             self.removeAllActions()
             self.armLeft.removeAllActions()
             self.armRight.removeAllActions()
             self.legLeft.removeAllActions()
             self.legRight.removeAllActions()
             
+            // Rotate limbs back into the default position
             self.rotateTo(self.armLeft, wantedRotation: 0, fullRotation: self.ARM_ROTATION)
             self.rotateTo(self.armRight, wantedRotation: 0, fullRotation: self.ARM_ROTATION)
             self.rotateTo(self.legLeft, wantedRotation: 0, fullRotation: self.LEG_ROTATION)
