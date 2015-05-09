@@ -52,11 +52,13 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         
         let character = Character(pivot: perspectiveRotation)
-//        character.position = SCNVector3Make(0, 0, 20)
-        scene.rootNode.addChildNode(character)
+        character.position = SCNVector3(x: 0, y: -80, z: 0)
+        
         
         // Grid
         createGridViews()
+        
+        gridNode.addChildNode(character)
     
         
         // Obstacles
@@ -99,7 +101,7 @@ class GameViewController: UIViewController {
         vector4 = MatrixVectorProduct(perspectiveRotation, vector4)
         vector3 = SCNVector3Make(vector4.x, vector4.y, vector4.z)
         println("\(vector3.x) \(vector3.y) \(vector3.z)")
-        scene.physicsWorld.gravity = SCNVector3Make(0, -10, 0)
+        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -300)
         
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
