@@ -105,8 +105,16 @@ class Character: SCNNode  {
         
         armLeft.runAction(SCNAction.repeatActionForever(armLeftAnimation))
         armRight.runAction(SCNAction.repeatActionForever(armRightAnimation))
+        
+        var wtf = self
+        
+        runAction(SCNAction.sequence([
+            SCNAction.waitForDuration(3.123),
+            SCNAction.runBlock({ (wtf) -> Void in
+                self.stop()
+            })]))
     }
-    
+
     func move() {
         
     }
@@ -117,13 +125,35 @@ class Character: SCNNode  {
         legRight.removeAllActions()
         armLeft.removeAllActions()
         armRight.removeAllActions()
-        
-        let rotateDuration = legLeft.rotation.w
+
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            self.rotateTo(self.legLeft, wantedRotation: 0, fullRotation: self.LEG_ROTATION)
+            self.rotateTo(self.legRight, wantedRotation: 0, fullRotation: self.LEG_ROTATION)
+            self.rotateTo(self.armLeft, wantedRotation: 0, fullRotation: self.ARM_ROTATION)
+            self.rotateTo(self.armRight, wantedRotation: 0, fullRotation: self.ARM_ROTATION)
+        })
+    }
+    
+    func rotateTo(node: SCNNode, wantedRotation: Float, fullRotation: Float) {
+        let targetDuration = abs(node.rotation.w) * Float(LIMB_ROTATE_DURATION) / abs(fullRotation)
+
+        let rotate = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: wantedRotation), duration: NSTimeInterval(targetDuration))
+        node.runAction(rotate)
     }
 
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
 }
