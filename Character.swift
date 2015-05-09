@@ -20,7 +20,7 @@ class Character: SCNNode  {
     let LIMB_ROTATE_DURATION = 0.5 as NSTimeInterval
     let LEG_ROTATION = PI/12
     let ARM_ROTATION = PI/6
-    let SPEED = 168 / 10 // points / second
+    let SPEED = 145 / 10 // points / second
     let headDimensions = Dimensions(width: 6, height: 6, length: 6)
     let torsoDimensions = Dimensions(width: 10, height: 15, length: 6)
     let armDimensions = Dimensions(width: 3, height: 12, length: 3)
