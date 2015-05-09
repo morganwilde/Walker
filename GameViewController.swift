@@ -20,6 +20,15 @@ struct Constants {
     static let lightGrayColorMaterial = ColorMaterial(UIColor.lightGrayColor())
 }
 
+func MatrixVectorProduct(matrix: SCNMatrix4, vector: SCNVector4) -> SCNVector4 {
+    let x = matrix.m11 * vector.x + matrix.m12 * vector.y + matrix.m13 * vector.z + matrix.m14 + vector.w;
+    let y = matrix.m21 * vector.x + matrix.m22 * vector.y + matrix.m23 * vector.z + matrix.m24 + vector.w;
+    let z = matrix.m31 * vector.x + matrix.m32 * vector.y + matrix.m33 * vector.z + matrix.m34 + vector.w;
+    let w = matrix.m41 * vector.x + matrix.m42 * vector.y + matrix.m43 * vector.z + matrix.m44 + vector.w;
+    
+    return SCNVector4(x: x, y: y, z: z, w: w)
+}
+
 class GameViewController: UIViewController {
     
     // Outlets
@@ -42,82 +51,13 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let characterNode = SCNNode()
-        characterNode.pivot = perspectiveRotation
-        
-        // Torso
-        let torsoGeometry = SCNBox(width: 6, height: 10, length: 15, chamferRadius: 0)
-        torsoGeometry.firstMaterial = Constants.redColorMaterial
-        let torsoNode = SCNNode(geometry: torsoGeometry)
-        characterNode.addChildNode(torsoNode)
-        
-        // Head
-        let headGeometry = SCNBox(width: 6, height: 6, length: 6, chamferRadius: 0)
-        headGeometry.firstMaterial = Constants.blueColorMaterial
-        let headNode = SCNNode(geometry: headGeometry)
-        headNode.position = SCNVector3(x: 0, y: 0, z: Float(torsoGeometry.length)/2 + Float(headGeometry.length)/2)
-        characterNode.addChildNode(headNode)
-        
-        // Arm right
-        let armGeometry = SCNBox(width: 3, height: 3, length: 12, chamferRadius: 0)
-        armGeometry.firstMaterial = Constants.grayColorMaterial
-        let armRightNode = SCNNode(geometry: armGeometry)
-        armRightNode.position = SCNVector3(x: 0, y: 0, z: Float(torsoGeometry.length)/2)
-        armRightNode.pivot = SCNMatrix4MakeTranslation(0, -Float(torsoGeometry.height)/2 - Float(armGeometry.height)/2, Float(armGeometry.length)/2)
-        armRightNode.rotation = SCNVector4(x: 0, y: 1, z: 0, w: PI/6)
-        characterNode.addChildNode(armRightNode)
-        
-        // Arm left
-        let armLeftNode = SCNNode(geometry: armGeometry)
-        armLeftNode.position = SCNVector3(x: 0, y: 0, z: Float(torsoGeometry.length)/2)
-        armLeftNode.pivot = SCNMatrix4MakeTranslation(0, Float(torsoGeometry.height)/2 + Float(armGeometry.height)/2, Float(armGeometry.length)/2)
-        armLeftNode.rotation = SCNVector4(x: 0, y: 1, z: 0, w: -PI/6)
-        characterNode.addChildNode(armLeftNode)
-        
-        // Leg right
-        let legGeometry = SCNBox(width: 4, height: 4, length: 15, chamferRadius: 0)
-        legGeometry.firstMaterial = Constants.blueColorMaterial
-        let legRightNode = SCNNode(geometry: legGeometry)
-        legRightNode.position = SCNVector3(x: 0, y: Float(torsoGeometry.height)/2 - Float(legGeometry.height)/2, z: 0)
-        legRightNode.pivot = SCNMatrix4MakeTranslation(0, 0, Float(legGeometry.length))
-        legRightNode.rotation = SCNVector4(x: 0, y: 1, z: 0, w: -PI/12)
-        characterNode.addChildNode(legRightNode)
-        
-        // Leg left
-        let legLeftNode = SCNNode(geometry: legGeometry)
-        legLeftNode.position = SCNVector3(x: 0, y: -Float(torsoGeometry.height)/2 + Float(legGeometry.height)/2, z: 0)
-        legLeftNode.pivot = SCNMatrix4MakeTranslation(0, 0, Float(legGeometry.length))
-        legLeftNode.rotation = SCNVector4(x: 0, y: 1, z: 0, w: PI/12)
-        characterNode.addChildNode(legLeftNode)
-        
-        scene.rootNode.addChildNode(characterNode)
-        
-        // Animation - legs
-        let legRightAnimation = SCNAction.sequence([
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/12), duration: 0.5),
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/12), duration: 0.5)
-            ])
-        let legLeftAnimation = SCNAction.sequence([
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/12), duration: 0.5),
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/12), duration: 0.5)
-            ])
-        legRightNode.runAction(SCNAction.repeatActionForever(legRightAnimation))
-        legLeftNode.runAction(SCNAction.repeatActionForever(legLeftAnimation))
-        
-        // Animation - arms
-        let armRightAnimation = SCNAction.sequence([
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/6), duration: 0.5),
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/6), duration: 0.5)
-            ])
-        let armLeftAnimation = SCNAction.sequence([
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/6), duration: 0.5),
-            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/6), duration: 0.5)
-            ])
-        armRightNode.runAction(SCNAction.repeatActionForever(armRightAnimation))
-        armLeftNode.runAction(SCNAction.repeatActionForever(armLeftAnimation))
+        let character = Character(pivot: perspectiveRotation)
+//        character.position = SCNVector3Make(0, 0, 20)
+        scene.rootNode.addChildNode(character)
         
         // Grid
         createGridViews()
+    
         
         // Obstacles
         createObstacleAtLocation(6, y: 6, height: 1) // Left wall
@@ -151,6 +91,15 @@ class GameViewController: UIViewController {
 //        gridNode.addChildNode(obstacleNode)
 //        
 //        scene.rootNode.addChildNode(gridNode)
+        
+        var vector3 = scene.physicsWorld.gravity
+        var vector4 = SCNVector4Make(vector3.x, vector3.y, vector3.z, 0)
+
+        println("\(vector3.x) \(vector3.y) \(vector3.z)")
+        vector4 = MatrixVectorProduct(perspectiveRotation, vector4)
+        vector3 = SCNVector3Make(vector4.x, vector4.y, vector4.z)
+        println("\(vector3.x) \(vector3.y) \(vector3.z)")
+        scene.physicsWorld.gravity = SCNVector3Make(0, -10, 0)
         
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
@@ -211,6 +160,10 @@ class GameViewController: UIViewController {
                     y: y * Float(cellGeometry.height),
                     z: 0
                 )
+                // Static physics body
+                cellNode.physicsBody = .staticBody()
+                cellNode.physicsBody?.categoryBitMask = Mask.FLOOR
+                cellNode.physicsBody?.collisionBitMask = Mask.CHARACTER
                 gridNode.addChildNode(cellNode)
             }
         }

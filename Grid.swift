@@ -13,7 +13,7 @@ class Grid {
     struct Const {
         static let WIDTH = 10
         static let HEIGHT = 6
-    }
+    }	
     
     // Grid dimensions (cell count)
     let width: Int
