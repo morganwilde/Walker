@@ -20,6 +20,7 @@ class Character: SCNNode  {
     let LIMB_ROTATE_DURATION = 0.5 as NSTimeInterval
     let LEG_ROTATION = PI/12
     let ARM_ROTATION = PI/6
+    let SPEED = 100 / 10 // points / second
     let headDimensions = Dimensions(width: 6, height: 6, length: 6)
     let torsoDimensions = Dimensions(width: 10, height: 15, length: 6)
     let armDimensions = Dimensions(width: 3, height: 12, length: 3)
@@ -81,62 +82,117 @@ class Character: SCNNode  {
         // Physics body // ToDo iskaiciuot isskleistu ranku ilgi
         geometry = SCNBox(width: headDimensions.length + torsoDimensions.length + legDimensions.length,
             height: headDimensions.width + torsoDimensions.width + legDimensions.width,
-            length: headDimensions.height + torsoDimensions.height + legDimensions.height + 9,
+            length: headDimensions.height + torsoDimensions.height + legDimensions.height + 8,
             chamferRadius: 0)
         geometry!.firstMaterial!.diffuse.contents = UIColor.clearColor()
         physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(geometry: geometry!, options: nil))
         physicsBody?.categoryBitMask = Mask.CHARACTER
         physicsBody?.collisionBitMask = Mask.FLOOR
         
-        // Leg animations
-        var rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
-        var rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
-        let legLeftAnimation = SCNAction.sequence([rotateNeg, rotatePos])
-        let legRightAnimation = SCNAction.sequence([rotatePos, rotateNeg])
+//        // Leg animations
+//        var rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
+//        var rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
+//        let legLeftAnimation = SCNAction.sequence([rotateNeg, rotatePos])
+//        let legRightAnimation = SCNAction.sequence([rotatePos, rotateNeg])
+//        
+//        legLeft.runAction(SCNAction.repeatActionForever(legLeftAnimation))
+//        legRight.runAction(SCNAction.repeatActionForever(legRightAnimation))
+//        
+//        // Arm animations
+//        rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
+//        rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
+//        let armLeftAnimation = SCNAction.sequence([rotatePos, rotateNeg])
+//        let armRightAnimation = SCNAction.sequence([rotateNeg, rotatePos])
+//        
+//        armLeft.runAction(SCNAction.repeatActionForever(armLeftAnimation))
+//        armRight.runAction(SCNAction.repeatActionForever(armRightAnimation))
+//        
+//        let myself = self
+//        runAction(SCNAction.sequence([
+//            SCNAction.waitForDuration(3.123),
+//            SCNAction.runBlock({ (myself) -> Void in
+//                self.stop()
+//            }, queue: dispatch_get_main_queue())
+//        ]))
+        let myself = self
+        runAction(SCNAction.runBlock({ (myself) -> Void in
+            self.moveTo(100, y: 0, z: 100)
+        }))
         
-        legLeft.runAction(SCNAction.repeatActionForever(legLeftAnimation))
-        legRight.runAction(SCNAction.repeatActionForever(legRightAnimation))
-        
-        // Arm animations
-        rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
-        rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
-        let armLeftAnimation = SCNAction.sequence([rotatePos, rotateNeg])
-        let armRightAnimation = SCNAction.sequence([rotateNeg, rotatePos])
-        
-        armLeft.runAction(SCNAction.repeatActionForever(armLeftAnimation))
-        armRight.runAction(SCNAction.repeatActionForever(armRightAnimation))
-        
-        var wtf = self
-        
-        runAction(SCNAction.sequence([
-            SCNAction.waitForDuration(3.123),
-            SCNAction.runBlock({ (wtf) -> Void in
-                self.stop()
-            })]))
+//        runAction(SCNAction.sequence([
+//            SCNAction.waitForDuration(2.345),
+//            SCNAction.runBlock({ (myself) -> Void in
+//                self.stop()
+//            })
+//        ]))
     }
 
-    func move() {
+    // ToDo if stop() action is in progress, remove and continue the movement ---- re-use rotateTo
+    // ToDo Make sure to call stop after movement is done
+    func moveTo(x: Float, y: Float, z: Float) {
+        // Rotation actions
+        let rotateArmNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
+        let rotateArmPos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
+        let rotateLegNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
+        let rotateLegPos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
         
+        // Repeating limb rotation actions
+        let armLeftRotation = SCNAction.repeatActionForever(SCNAction.sequence([rotateArmPos, rotateArmNeg]))
+        let armRightRotation = SCNAction.repeatActionForever(SCNAction.sequence([rotateArmNeg, rotateArmPos]))
+        let legLeftRotation = SCNAction.repeatActionForever(SCNAction.sequence([rotateLegNeg, rotateLegPos]))
+        let legRightRotation = SCNAction.repeatActionForever(SCNAction.sequence([rotateLegPos, rotateLegNeg]))
+        
+        // Distance from current position to target
+        let target = SCNVector3Make(position.x + x, position.y + y, position.z + z)
+        let distance = sqrt(pow(target.x - position.x, 2) + pow(target.y - position.y, 2) + pow(target.z - position.z, 2))
+        println("distance: \(distance)")
+        let duration = NSTimeInterval(distance / Float(SPEED))
+        println("duration: \(duration)")
+        // Character movement action
+        let charMovement = SCNAction.repeatActionForever(SCNAction.moveByX(CGFloat(x), y: CGFloat(y), z: CGFloat(z), duration: duration))
+        
+        let myself = self as Character
+        // Limb movement action
+        let limbMovement = SCNAction.runBlock({ (myself) -> Void in
+            self.armLeft.runAction(armLeftRotation)
+            self.armRight.runAction(armRightRotation)
+            self.legLeft.runAction(legLeftRotation)
+            self.legRight.runAction(legRightRotation)
+        })
+        
+        // Char movement action
+        let groupAction = SCNAction.runBlock({ (myself) -> Void in
+            // Following is a repeating action
+            self.runAction(SCNAction.group([
+                limbMovement,
+                charMovement
+                ])) {
+                    self.stop()
+            }
+        }, queue: dispatch_get_main_queue())
+        
+        // Following will be run once
+        runAction(groupAction)
     }
     
+    // Always runs on the UI thread
     func stop() {
-        // Remove existing actions
-        legLeft.removeAllActions()
-        legRight.removeAllActions()
-        armLeft.removeAllActions()
-        armRight.removeAllActions()
-
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            self.rotateTo(self.legLeft, wantedRotation: 0, fullRotation: self.LEG_ROTATION)
-            self.rotateTo(self.legRight, wantedRotation: 0, fullRotation: self.LEG_ROTATION)
+            self.removeAllActions()
+            self.armLeft.removeAllActions()
+            self.armRight.removeAllActions()
+            self.legLeft.removeAllActions()
+            self.legRight.removeAllActions()
+            
             self.rotateTo(self.armLeft, wantedRotation: 0, fullRotation: self.ARM_ROTATION)
             self.rotateTo(self.armRight, wantedRotation: 0, fullRotation: self.ARM_ROTATION)
+            self.rotateTo(self.legLeft, wantedRotation: 0, fullRotation: self.LEG_ROTATION)
+            self.rotateTo(self.legRight, wantedRotation: 0, fullRotation: self.LEG_ROTATION)
         })
     }
     
     func rotateTo(node: SCNNode, wantedRotation: Float, fullRotation: Float) {
         let targetDuration = abs(node.rotation.w) * Float(LIMB_ROTATE_DURATION) / abs(fullRotation)
-
         let rotate = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: wantedRotation), duration: NSTimeInterval(targetDuration))
         node.runAction(rotate)
     }
