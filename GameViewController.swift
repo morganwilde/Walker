@@ -51,13 +51,12 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let character = Character(pivot: perspectiveRotation)
-        character.position = SCNVector3(x: 0, y: -80, z: 0)
-        
         
         // Grid
         createGridViews()
         
+        let character = Character()
+        character.position = SCNVector3(x: 20, y: 0, z: 40)
         gridNode.addChildNode(character)
     
         
@@ -93,15 +92,8 @@ class GameViewController: UIViewController {
 //        gridNode.addChildNode(obstacleNode)
 //        
 //        scene.rootNode.addChildNode(gridNode)
-        
-        var vector3 = scene.physicsWorld.gravity
-        var vector4 = SCNVector4Make(vector3.x, vector3.y, vector3.z, 0)
 
-        println("\(vector3.x) \(vector3.y) \(vector3.z)")
-        vector4 = MatrixVectorProduct(perspectiveRotation, vector4)
-        vector3 = SCNVector3Make(vector4.x, vector4.y, vector4.z)
-        println("\(vector3.x) \(vector3.y) \(vector3.z)")
-        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -300)
+        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -1000)
         
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
@@ -132,9 +124,17 @@ class GameViewController: UIViewController {
         cameraNode.camera?.zFar = 400
         cameraNode.camera?.zNear = -200
         
+        let perspectiveRotationX = SCNMatrix4MakeRotation(135*PI/180, 1, 0, 0)
+        let perspectiveRotationY = SCNMatrix4MakeRotation(0*PI/180, 0, 1, 0)
+        let perspectiveRotationZ = SCNMatrix4MakeRotation(60*PI/180, 0, 0, 1)
+        let perspectiveRotation = SCNMatrix4Mult(SCNMatrix4Mult(perspectiveRotationX, perspectiveRotationY) , perspectiveRotationZ)
+        cameraNode.transform = perspectiveRotation
+        
         scene.rootNode.addChildNode(cameraNode)
         
         sceneView.scene = scene
+        sceneView.backgroundColor = UIColor.blackColor()
+        sceneView.showsStatistics = true
         sceneView.allowsCameraControl = true
     }
     
@@ -143,7 +143,7 @@ class GameViewController: UIViewController {
         let horizontalMiddle = grid.width / 2
         let verticalMiddle = grid.height / 2
         
-        gridNode.pivot = SCNMatrix4Mult(perspectiveRotation, SCNMatrix4MakeTranslation(0, 0, 15+15/2))
+//        gridNode.pivot = SCNMatrix4Mult(perspectiveRotation, SCNMatrix4MakeTranslation(0, 0, 15+15/2))
         
         let cellGeometry = SCNBox(width: 16, height: 16, length: 3, chamferRadius: 0)
         let cellMaterial = SCNMaterial()
@@ -194,11 +194,11 @@ class GameViewController: UIViewController {
         
         // Find the appropriate position
         let obstaceNode = SCNNode(geometry: obstacleGeometry)
-        obstaceNode.pivot = SCNMatrix4MakeTranslation(0, 0, -Float(obstacleGeometry.length)/2 - 3/2)
+//        obstaceNode.pivot = SCNMatrix4MakeTranslation(0, 0, -Float(obstacleGeometry.length)/2 - 3/2)
         obstaceNode.position = SCNVector3(
             x: (x - horizontalMiddle) * Float(length),
             y: (y - verticalMiddle) * Float(length),
-            z: 0)
+            z: Float(grid.height) + Float(height))
         
         gridNode.addChildNode(obstaceNode)
     }

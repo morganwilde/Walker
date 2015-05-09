@@ -7,13 +7,14 @@
 //
 
 import Foundation
+import UIKit
 
 struct Dimensions {
-    var width: Float // Y
-    var height: Float // Z
-    var length: Float // X
-    
-    init(width: Float, height: Float, length: Float) {
+    let width: CGFloat // Y
+    let height: CGFloat // Z
+    let length: CGFloat // X
+
+    init(width: CGFloat, height: CGFloat, length: CGFloat) {
         self.width = width
         self.height = height
         self.length = length

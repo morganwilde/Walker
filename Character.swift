@@ -17,27 +17,30 @@ struct Mask {
 
 class Character: SCNNode  {
     
-    var headDimensions = Dimensions(width: 6, height: 6, length: 6)
-    var torsoDimensions = Dimensions(width: 10, height: 15, length: 6)
-    var armDimensions = Dimensions(width: 3, height: 3, length: 12)
-    var legDimensions = Dimensions(width: 4, height: 15, length: 4)
+    let LIMB_ROTATE_DURATION = 0.5 as NSTimeInterval
+    let LEG_ROTATION = PI/12
+    let ARM_ROTATION = PI/6
+    let headDimensions = Dimensions(width: 6, height: 6, length: 6)
+    let torsoDimensions = Dimensions(width: 10, height: 15, length: 6)
+    let armDimensions = Dimensions(width: 3, height: 12, length: 3)
+    let legDimensions = Dimensions(width: 4, height: 15, length: 4)
     
     let head, torso, armLeft, armRight, legLeft, legRight: SCNNode
     
-    init(pivot: SCNMatrix4) {
+    override init() {
         // Torso
-        let torsoGeometry = SCNBox(width: 6, height: 10, length: 15, chamferRadius: 0)
+        let torsoGeometry = SCNBox(width: torsoDimensions.length, height: torsoDimensions.width, length: torsoDimensions.height, chamferRadius: 0)
         torsoGeometry.firstMaterial = Constants.redColorMaterial
         torso = SCNNode(geometry: torsoGeometry)
         
         // Head
-        let headGeometry = SCNBox(width: 6, height: 6, length: 6, chamferRadius: 0)
+        let headGeometry = SCNBox(width: headDimensions.length, height: headDimensions.width, length: headDimensions.height, chamferRadius: 0)
         headGeometry.firstMaterial = Constants.blueColorMaterial
         head = SCNNode(geometry: headGeometry)
         head.position = SCNVector3(x: 0, y: 0, z: Float(torsoGeometry.length)/2 + Float(headGeometry.length)/2)
         
         // Arms
-        let armGeometry = SCNBox(width: 3, height: 3, length: 12, chamferRadius: 0)
+        let armGeometry = SCNBox(width: armDimensions.length, height: armDimensions.width, length: armDimensions.height, chamferRadius: 0)
         armGeometry.firstMaterial = Constants.grayColorMaterial
         
         armLeft = SCNNode(geometry: armGeometry)
@@ -51,7 +54,7 @@ class Character: SCNNode  {
         armRight.rotation = SCNVector4(x: 0, y: 1, z: 0, w: PI/6)
         
         // Legs
-        let legGeometry = SCNBox(width: 4, height: 4, length: 15, chamferRadius: 0)
+        let legGeometry = SCNBox(width: legDimensions.length, height: legDimensions.width, length: legDimensions.height, chamferRadius: 0)
         legGeometry.firstMaterial = Constants.blueColorMaterial
         
         legRight = SCNNode(geometry: legGeometry)
@@ -68,7 +71,6 @@ class Character: SCNNode  {
         super.init()
         
         // Build the char
-//        self.pivot = pivot
         addChildNode(head)
         addChildNode(torso)
         addChildNode(armLeft)
@@ -76,37 +78,47 @@ class Character: SCNNode  {
         addChildNode(legLeft)
         addChildNode(legRight)
         
-        // Physics body
-        physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(node: self, options: nil))
-        physicsBody = .dynamicBody()
+        // Physics body // ToDo iskaiciuot isskleistu ranku ilgi
+        geometry = SCNBox(width: headDimensions.length + torsoDimensions.length + legDimensions.length,
+            height: headDimensions.width + torsoDimensions.width + legDimensions.width,
+            length: headDimensions.height + torsoDimensions.height + legDimensions.height + 9,
+            chamferRadius: 0)
+        geometry!.firstMaterial!.diffuse.contents = UIColor.clearColor()
+        physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(geometry: geometry!, options: nil))
         physicsBody?.categoryBitMask = Mask.CHARACTER
         physicsBody?.collisionBitMask = Mask.FLOOR
         
-        // Create and start animations
+        // Leg animations
+        var rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
+        var rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: LEG_ROTATION), duration: LIMB_ROTATE_DURATION)
+        let legLeftAnimation = SCNAction.sequence([rotateNeg, rotatePos])
+        let legRightAnimation = SCNAction.sequence([rotatePos, rotateNeg])
         
-//        // Animation - legs
-//        let legRightAnimation = SCNAction.sequence([
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/12), duration: 0.5),
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/12), duration: 0.5)
-//            ])
-//        let legLeftAnimation = SCNAction.sequence([
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/12), duration: 0.5),
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/12), duration: 0.5)
-//            ])
-//        legRightNode.runAction(SCNAction.repeatActionForever(legRightAnimation))
-//        legLeftNode.runAction(SCNAction.repeatActionForever(legLeftAnimation))
-//        
-//        // Animation - arms
-//        let armRightAnimation = SCNAction.sequence([
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/6), duration: 0.5),
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/6), duration: 0.5)
-//            ])
-//        let armLeftAnimation = SCNAction.sequence([
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: PI/6), duration: 0.5),
-//            SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -PI/6), duration: 0.5)
-//            ])
-//        armRightNode.runAction(SCNAction.repeatActionForever(armRightAnimation))
-//        armLeftNode.runAction(SCNAction.repeatActionForever(armLeftAnimation))
+        legLeft.runAction(SCNAction.repeatActionForever(legLeftAnimation))
+        legRight.runAction(SCNAction.repeatActionForever(legRightAnimation))
+        
+        // Arm animations
+        rotateNeg = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: -ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
+        rotatePos = SCNAction.rotateToAxisAngle(SCNVector4(x: 0, y: 1, z: 0, w: ARM_ROTATION), duration: LIMB_ROTATE_DURATION)
+        let armLeftAnimation = SCNAction.sequence([rotatePos, rotateNeg])
+        let armRightAnimation = SCNAction.sequence([rotateNeg, rotatePos])
+        
+        armLeft.runAction(SCNAction.repeatActionForever(armLeftAnimation))
+        armRight.runAction(SCNAction.repeatActionForever(armRightAnimation))
+    }
+    
+    func move() {
+        
+    }
+    
+    func stop() {
+        // Remove existing actions
+        legLeft.removeAllActions()
+        legRight.removeAllActions()
+        armLeft.removeAllActions()
+        armRight.removeAllActions()
+        
+        let rotateDuration = legLeft.rotation.w
     }
 
     required init(coder aDecoder: NSCoder) {
