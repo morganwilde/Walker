@@ -87,14 +87,7 @@ class Character: SCNNode  {
         geometry!.firstMaterial!.diffuse.contents = UIColor.clearColor()
         physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(geometry: geometry!, options: nil))
         physicsBody?.categoryBitMask = Mask.CHARACTER
-        physicsBody?.collisionBitMask = Mask.FLOOR | Mask.OBSTACLE
-        
-        // Weird physicsBody params (might need to prevent the friction)
-        physicsBody?.restitution = 0
-        physicsBody?.angularDamping = 100000
-        physicsBody?.angularVelocity = SCNVector4Make(0, 0, 0, 0)
-        physicsBody?.friction = 0
-        
+        physicsBody?.collisionBitMask = Mask.FLOOR | Mask.OBSTACLE        
         
         let myself = self
         runAction(SCNAction.sequence([
