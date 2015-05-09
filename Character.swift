@@ -86,6 +86,10 @@ class Character: SCNNode  {
             chamferRadius: 0)
         geometry!.firstMaterial!.diffuse.contents = UIColor.clearColor()
         physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(geometry: geometry!, options: nil))
+        physicsBody?.restitution = 0
+        physicsBody?.angularDamping = 100000
+        physicsBody?.angularVelocity = SCNVector4Make(0, 0, 0, 0)
+        physicsBody?.friction = 50
         physicsBody?.categoryBitMask = Mask.CHARACTER
         physicsBody?.collisionBitMask = Mask.FLOOR
         
@@ -116,7 +120,7 @@ class Character: SCNNode  {
 //        ]))
         let myself = self
         runAction(SCNAction.runBlock({ (myself) -> Void in
-            self.moveTo(100, y: 0, z: 100)
+            self.moveTo(100, y: 0, z: 0)
         }))
         
 //        runAction(SCNAction.sequence([
