@@ -20,11 +20,11 @@ class Character: SCNNode  {
     let LIMB_ROTATE_DURATION = 0.5 as NSTimeInterval
     let LEG_ROTATION = PI/12
     let ARM_ROTATION = PI/6
-    let SPEED = 14.5 // points / second
-    let headDimensions = Dimensions(width: 6, height: 6, length: 6)
-    let torsoDimensions = Dimensions(width: 10, height: 15, length: 6)
-    let armDimensions = Dimensions(width: 3, height: 12, length: 3)
-    let legDimensions = Dimensions(width: 4, height: 15, length: 4)
+    let SPEED = 2 // points / second
+    let headDimensions = Dimensions(width: 0.6, height: 0.6, length: 0.6)
+    let torsoDimensions = Dimensions(width: 1.0, height: 1.5, length: 0.6)
+    let armDimensions = Dimensions(width: 0.3, height: 1.2, length: 0.3)
+    let legDimensions = Dimensions(width: 0.4, height: 1.5, length: 0.4)
     
     let head, torso, armLeft, armRight, legLeft, legRight: SCNNode
     
@@ -80,14 +80,16 @@ class Character: SCNNode  {
         addChildNode(legRight)
         
         // Physics body // ToDo iskaiciuot isskleistu ranku ilgi // ToDo -5 = because too fat to fit between obstacles
-        geometry = SCNBox(width: headDimensions.length + torsoDimensions.length + legDimensions.length - 5,
+        geometry = SCNBox(
+            width: headDimensions.length + torsoDimensions.length + legDimensions.length - 5,
             height: headDimensions.width + torsoDimensions.width + legDimensions.width - 5,
             length: headDimensions.height + torsoDimensions.height + legDimensions.height + 8,
             chamferRadius: 0)
         geometry!.firstMaterial!.diffuse.contents = UIColor.clearColor()
         physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(geometry: geometry!, options: nil))
-        physicsBody?.categoryBitMask = Mask.CHARACTER
-        physicsBody?.collisionBitMask = Mask.FLOOR | Mask.OBSTACLE        
+        physicsBody?.categoryBitMask = Masks.CHARACTER
+        physicsBody?.collisionBitMask = Masks.FLOOR | Masks.OBSTACLE
+        physicsBody?.mass = 100
         
         let myself = self
         runAction(SCNAction.sequence([

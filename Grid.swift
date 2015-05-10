@@ -11,7 +11,7 @@ import Foundation
 class Grid {
     // Grid related constants
     struct Const {
-        static let WIDTH = 10
+        static let WIDTH = 20
         static let HEIGHT = 6
     }	
     

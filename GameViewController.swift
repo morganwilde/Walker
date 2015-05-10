@@ -36,52 +36,54 @@ class GameViewController: UIViewController, SCNPhysicsContactDelegate {
     
     // Views
     var scene = SCNScene()
-    var gridNode = SCNNode()
+    var gridNode: GridNode!
+    var characterNode: Character!
     
     // Models
     var grid = Grid()
     
-    // Properties
-    var perspectiveRotationX = SCNMatrix4MakeRotation(120*PI/180, 1, 0, 0)
-    var perspectiveRotationZ = SCNMatrix4MakeRotation(60*PI/180, 0, 0, 1)
-    var perspectiveRotation: SCNMatrix4 {
-        return SCNMatrix4Mult(perspectiveRotationX, perspectiveRotationZ)
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Grid
-        createGridViews()
+        // Scene preferences
+        let rootNode = scene.rootNode
+        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -100)
+        scene.physicsWorld.contactDelegate = self
         
-        let character = Character()
-//        character.position = SCNVector3(x: 20, y: 0, z: 40)
-        character.position = SCNVector3(x: -30, y: -20, z: 40)
-        gridNode.addChildNode(character)
+        // Grid
+        gridNode = GridNode(width: 10, height: 1)
+        rootNode.addChildNode(gridNode)
+        
+        // Character
+        characterNode = Character()
+        gridNode.putNodeOnCellAt(characterNode, x: 0, y: 0)
+        
+        // Camera
+        rootNode.addChildNode(CameraNode())
     
         
         // Obstacles
-        // Left wall
-        createObstacleAtLocation(6, y: 6, height: 1)
-        createObstacleAtLocation(5, y: 6, height: 2)
-        createObstacleAtLocation(4, y: 6, height: 3)
-        createObstacleAtLocation(3, y: 6, height: 1)
-        createObstacleAtLocation(2, y: 6, height: 2)
-        createObstacleAtLocation(1, y: 6, height: 1)
-        createObstacleAtLocation(0, y: 6, height: 1)
-        // Front wall
-        createObstacleAtLocation(6, y: 5, height: 1)
-        createObstacleAtLocation(6, y: 4, height: 1)
-        createObstacleAtLocation(6, y: 2, height: 1)
-        createObstacleAtLocation(6, y: 1, height: 1)
-        createObstacleAtLocation(6, y: 0, height: 1)
+//        // Left wall
+//        createObstacleAtLocation(6, y: 6, height: 1)
+//        createObstacleAtLocation(5, y: 6, height: 2)
+//        createObstacleAtLocation(4, y: 6, height: 3)
+//        createObstacleAtLocation(3, y: 6, height: 1)
+//        createObstacleAtLocation(2, y: 6, height: 2)
+//        createObstacleAtLocation(1, y: 6, height: 1)
+//        createObstacleAtLocation(0, y: 6, height: 1)
+//        // Front wall
+//        createObstacleAtLocation(6, y: 5, height: 1)
+//        createObstacleAtLocation(6, y: 4, height: 1)
+//        createObstacleAtLocation(6, y: 2, height: 1)
+//        createObstacleAtLocation(6, y: 1, height: 1)
+//        createObstacleAtLocation(6, y: 0, height: 1)
         
         // Ambient light
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = SCNLightTypeAmbient
         ambientLightNode.light!.color = UIColor(white: 0.5, alpha: 1.0)
-        scene.rootNode.addChildNode(ambientLightNode)
+//        scene.rootNode.addChildNode(ambientLightNode)
         
         // Shadow light
         let shadowLightNode = SCNNode()
@@ -91,28 +93,9 @@ class GameViewController: UIViewController, SCNPhysicsContactDelegate {
         shadowLightNode.light!.shadowColor = UIColor(white: 0, alpha: 1.0)
         shadowLightNode.light!.spotInnerAngle = 20
         shadowLightNode.light!.spotOuterAngle = 30
-        shadowLightNode.position = SCNVector3Make(0, 40, 40)
-        shadowLightNode.rotation = SCNVector4Make(1, 0, 0, CFloat(-M_PI_4))
-        scene.rootNode.addChildNode(shadowLightNode)
-        
-        // Camera
-        let cameraNode = SCNNode()
-        cameraNode.camera = SCNCamera()
-        cameraNode.position = SCNVector3Make(0, 0, 50)
-        cameraNode.camera?.orthographicScale = 100
-        cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.zFar = 400
-        cameraNode.camera?.zNear = -200
-        let perspectiveRotationX = SCNMatrix4MakeRotation(135*PI/180, 1, 0, 0)
-        let perspectiveRotationY = SCNMatrix4MakeRotation(0*PI/180, 0, 1, 0)
-        let perspectiveRotationZ = SCNMatrix4MakeRotation(60*PI/180, 0, 0, 1)
-        let perspectiveRotation = SCNMatrix4Mult(SCNMatrix4Mult(perspectiveRotationX, perspectiveRotationY) , perspectiveRotationZ)
-        cameraNode.transform = perspectiveRotation
-        scene.rootNode.addChildNode(cameraNode)
-        
-        // Scene preferences
-        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -1000)
-        scene.physicsWorld.contactDelegate = self
+        shadowLightNode.position = SCNVector3Make(0, 0, 40)
+        characterNode.addChildNode(shadowLightNode)
+
         
         // SceneView preferences
         sceneView.scene = scene
@@ -125,7 +108,7 @@ class GameViewController: UIViewController, SCNPhysicsContactDelegate {
         let horizontalMiddle = grid.width / 2
         let verticalMiddle = grid.height / 2
 
-        let cellGeometry = SCNBox(width: 16, height: 16, length: 3, chamferRadius: 0)
+        let cellGeometry = SCNBox(width: 2, height: 2, length: 2, chamferRadius: 0)
         let cellMaterial = SCNMaterial()
         cellMaterial.diffuse.contents = UIImage(named: "cell-background")
         cellGeometry.firstMaterial = cellMaterial
@@ -197,6 +180,7 @@ class GameViewController: UIViewController, SCNPhysicsContactDelegate {
                 char.stop()
             }
         case (Mask.CHARACTER | Mask.FLOOR):
+            println("char on floor")
             // Prevent spam on default case
             break
         default:
