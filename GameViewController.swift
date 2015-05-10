@@ -47,7 +47,7 @@ class GameViewController: UIViewController, SCNPhysicsContactDelegate {
         
         // Scene preferences
         let rootNode = scene.rootNode
-        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -100)
+        scene.physicsWorld.gravity = SCNVector3Make(0, 0, -10)
         scene.physicsWorld.contactDelegate = self
         
         // Grid
@@ -127,8 +127,8 @@ class GameViewController: UIViewController, SCNPhysicsContactDelegate {
                 )
                 // Static physics body
                 cellNode.physicsBody = .staticBody()
-                cellNode.physicsBody?.categoryBitMask = Mask.FLOOR
-                cellNode.physicsBody?.collisionBitMask = Mask.CHARACTER
+                cellNode.physicsBody?.categoryBitMask = Masks.FLOOR
+                cellNode.physicsBody?.collisionBitMask = Masks.CHARACTER
                 gridNode.addChildNode(cellNode)
             }
         }
@@ -164,22 +164,22 @@ class GameViewController: UIViewController, SCNPhysicsContactDelegate {
         
         // Static physics body
         obstacleNode.physicsBody = .staticBody()
-        obstacleNode.physicsBody?.categoryBitMask = Mask.OBSTACLE
-        obstacleNode.physicsBody?.collisionBitMask = Mask.CHARACTER
+        obstacleNode.physicsBody?.categoryBitMask = Masks.OBSTACLE
+        obstacleNode.physicsBody?.collisionBitMask = Masks.CHARACTER
         
         gridNode.addChildNode(obstacleNode)
     }
     
     func physicsWorld(world: SCNPhysicsWorld, didBeginContact contact: SCNPhysicsContact) {
         switch (contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask) {
-        case (Mask.CHARACTER | Mask.OBSTACLE):
+        case (Masks.CHARACTER | Masks.OBSTACLE):
             // Stop character
             if let char = contact.nodeA as? Character {
                 char.stop()
             } else if let char = contact.nodeB as? Character {
                 char.stop()
             }
-        case (Mask.CHARACTER | Mask.FLOOR):
+        case (Masks.CHARACTER | Masks.FLOOR):
             println("char on floor")
             // Prevent spam on default case
             break

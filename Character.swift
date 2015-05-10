@@ -8,13 +8,6 @@
 
 import SceneKit
 
-struct Mask {
-    static let SCENE        = 1
-    static let FLOOR        = 2
-    static let CHARACTER    = 3
-    static let OBSTACLE     = 4
-}
-
 class Character: SCNNode  {
     
     let LIMB_ROTATE_DURATION = 0.5 as NSTimeInterval
@@ -81,9 +74,9 @@ class Character: SCNNode  {
         
         // Physics body // ToDo iskaiciuot isskleistu ranku ilgi // ToDo -5 = because too fat to fit between obstacles
         geometry = SCNBox(
-            width: headDimensions.length + torsoDimensions.length + legDimensions.length - 5,
-            height: headDimensions.width + torsoDimensions.width + legDimensions.width - 5,
-            length: headDimensions.height + torsoDimensions.height + legDimensions.height + 8,
+            width: headDimensions.length + torsoDimensions.length + legDimensions.length,
+            height: headDimensions.width + torsoDimensions.width + legDimensions.width,
+            length: headDimensions.height + torsoDimensions.height + legDimensions.height,
             chamferRadius: 0)
         geometry!.firstMaterial!.diffuse.contents = UIColor.clearColor()
         physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.Dynamic, shape: SCNPhysicsShape(geometry: geometry!, options: nil))
